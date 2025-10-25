@@ -1,0 +1,13 @@
+package com.PedroA10.GeoAPI;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class GeoApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(GeoApiApplication.class, args);
+	}
+
+}
