@@ -14,7 +14,7 @@ import java.util.List;
 
 @Document(collection = "points")
 @CompoundIndexes({
-  @CompoundIndex(name = "locations_2dsphere", def = "{'locations': '2dsphere'}")
+  @CompoundIndex(name = "point_2dsphere", def = "{'point': '2dsphere'}")
 })
 @AllArgsConstructor
 @NoArgsConstructor
