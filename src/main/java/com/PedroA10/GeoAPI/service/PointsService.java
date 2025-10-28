@@ -1,5 +1,8 @@
 package com.PedroA10.GeoAPI.service;
 
+import com.PedroA10.GeoAPI.dto.PointsRequestDTO;
+import com.PedroA10.GeoAPI.dto.PointsResponseDTO;
+import com.PedroA10.GeoAPI.mapper.PointsMapper;
 import com.PedroA10.GeoAPI.model.Points;
 import com.PedroA10.GeoAPI.repository.PointsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,63 +19,88 @@ public class PointsService {
   @Autowired
   PointsRepository pointsRepository;
 
-  public Points createPoint(Points point) {
-    return pointsRepository.save(point);
+  @Autowired
+  private PointsMapper pointsMapper;
+
+  public PointsResponseDTO createPoint(PointsRequestDTO point) {
+    Points points = pointsMapper.toEntity(point);
+    Points savePoint = pointsRepository.save(points);
+    return pointsMapper.toResponseDTO(savePoint);
   }
 
-  public List<Points> findAll() {
-    return pointsRepository.findAll();
+  public List<PointsResponseDTO> findAll() {
+    List<Points> pointsList =  pointsRepository.findAll();
+    return pointsMapper.toResponseDTOList(pointsList);
   }
 
-  public Optional<Points> findById(String id) {
-    return pointsRepository.findById(id);
+  public Optional<PointsResponseDTO> findById(String id) {
+    Optional<Points> pointsOPT = pointsRepository.findById(id);
+    return pointsOPT.map(pointsMapper::toResponseDTO);
   }
 
-  public List<Points> findByName(String name) {
-    return pointsRepository.findByNameLocale(name);
+  public List<PointsResponseDTO> findByName(String name) {
+    List<Points> listNameLocale = pointsRepository.findByNameLocale(name);
+    return pointsMapper.toResponseDTOList(listNameLocale);
   }
 
-  public List<Points> getPointsByCity(String city) {
-    return pointsRepository.findByCity(city);
+  public List<PointsResponseDTO> getPointsByCity(String city) {
+    List<Points> listCityName = pointsRepository.findByCity(city);
+    return pointsMapper.toResponseDTOList(listCityName);
   }
 
-  public List<Points> getPointsByState(String state) {
-    return pointsRepository.findByState(state);
+  public List<PointsResponseDTO> getPointsByState(String state) {
+    List<Points> listStateName = pointsRepository.findByState(state);
+    return pointsMapper.toResponseDTOList(listStateName);
   }
 
-  public List<Points> getPointsByCountry(String country) {
-    return pointsRepository.findByCountry(country);
+  public List<PointsResponseDTO> getPointsByCountry(String country) {
+    List<Points> listCountryName = pointsRepository.findByCountry(country);
+    return pointsMapper.toResponseDTOList(listCountryName);
   }
 
-  public List<Points> getPointsByCategory(String category) {
-    return pointsRepository.findByCategory(category);
+  public List<PointsResponseDTO> getPointsByCategory(String category) {
+    List<Points> listByCategory = pointsRepository.findByCategory(category);
+    return pointsMapper.toResponseDTOList(listByCategory);
   }
 
-  public List<Points> getPointsByTag(String tag) {
-    return pointsRepository.findByTagsContaining(tag);
+  public List<PointsResponseDTO> getPointsByTag(String tag) {
+    List<Points> listTags = pointsRepository.findByTagsContaining(tag);
+    return pointsMapper.toResponseDTOList(listTags);
   }
 
-  public List<Points> getActivePoints() {
-    return pointsRepository.localeActive(true);
+  public List<PointsResponseDTO> getActivePoints() {
+    List<Points> activePoints = pointsRepository.localeActive(true);
+    return pointsMapper.toResponseDTOList(activePoints);
   }
 
-  public List<Points> getPointsByRating(double rating) {
-    return pointsRepository.findByRating(rating);
+  public List<PointsResponseDTO> getPointsByRating(double rating) {
+    List<Points> listByRating = pointsRepository.findByRating(rating);
+    return pointsMapper.toResponseDTOList(listByRating);
   }
 
-  public List<Points> getPointsWithinPolygon(Object geoJsonPolygon) {
-    return pointsRepository.findPointsWithinPolygon(geoJsonPolygon);
+  public List<PointsResponseDTO> getPointsWithinPolygon(Object geoJsonPolygon) {
+    List<Points> pointsWithinPolygon = pointsRepository.findPointsWithinPolygon(geoJsonPolygon);
+    return pointsMapper.toResponseDTOList(pointsWithinPolygon);
   }
 
-  public List<Points> getPointsNearby(double longitude, double latitude, double radiusKm) {
+  public List<PointsResponseDTO> getPointsNearby(double longitude, double latitude, double radiusKm) {
     Point location = new Point(longitude, latitude);
     Distance distance = new Distance(radiusKm, org.springframework.data.geo.Metrics.KILOMETERS);
-    return pointsRepository.findByPointNear(location, distance);
+    List<Points> nearbyPoints = pointsRepository.findByPointNear(location, distance);
+    return pointsMapper.toResponseDTOList(nearbyPoints);
   }
 
-  public Points updatePoint(String id, Points updatedPoint) {
-    updatedPoint.setId(id);
-    return pointsRepository.save(updatedPoint);
+  public PointsResponseDTO updatePoint(String id, PointsRequestDTO requestDTO) {
+    Optional<Points> pointsOPT = pointsRepository.findById(id);
+    if (pointsOPT.isEmpty()) {
+      throw new RuntimeException("Point not found");
+    }
+
+    Points existingPoint = pointsOPT.get();
+    pointsMapper.updateEntityFromDTO(requestDTO, existingPoint);
+    existingPoint.setId(id);
+    Points updatedPoint = pointsRepository.save(existingPoint);
+    return pointsMapper.toResponseDTO(updatedPoint);
   }
 
   public void deletePoint(String id) {
