@@ -20,7 +20,7 @@ public class PointsService {
     return pointsRepository.save(point);
   }
 
-  public List<Points> findALl(Points point) {
+  public List<Points> findAll() {
     return pointsRepository.findAll();
   }
 
