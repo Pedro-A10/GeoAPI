@@ -1,7 +1,9 @@
 package com.PedroA10.GeoAPI.controller;
 
-import com.PedroA10.GeoAPI.model.Points;
+import com.PedroA10.GeoAPI.dto.PointsRequestDTO;
+import com.PedroA10.GeoAPI.dto.PointsResponseDTO;
 import com.PedroA10.GeoAPI.service.PointsService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,65 +20,65 @@ public class PointsController {
   PointsService pointsService;
 
   @GetMapping
-  public ResponseEntity<List<Points>> listPoints() {
+  public ResponseEntity<List<PointsResponseDTO>> listPoints() {
     return ResponseEntity.ok(pointsService.findAll());
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Points> listById(@PathVariable String id) {
-    Optional<Points> point = pointsService.findById(id);
+  public ResponseEntity<PointsResponseDTO> listById(@PathVariable String id) {
+    Optional<PointsResponseDTO> point = pointsService.findById(id);
     return point.map(ResponseEntity::ok)
       .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @GetMapping("/by-name")
-  public ResponseEntity<List<Points>> listByName(@RequestParam String name) {
+  public ResponseEntity<List<PointsResponseDTO>> listByName(@RequestParam String name) {
     return ResponseEntity.ok(pointsService.findByName(name));
   }
 
   @GetMapping("/by-city")
-  public ResponseEntity<List<Points>> listByCity(@RequestParam String city) {
+  public ResponseEntity<List<PointsResponseDTO>> listByCity(@RequestParam String city) {
     return ResponseEntity.ok(pointsService.getPointsByCity(city));
   }
 
   @GetMapping("/by-state")
-  public ResponseEntity<List<Points>> listByState(@RequestParam String state) {
+  public ResponseEntity<List<PointsResponseDTO>> listByState(@RequestParam String state) {
     return ResponseEntity.ok(pointsService.getPointsByState(state));
   }
 
   @GetMapping("/by-country")
-  public ResponseEntity<List<Points>> listByCountry(@RequestParam String country) {
+  public ResponseEntity<List<PointsResponseDTO>> listByCountry(@RequestParam String country) {
     return ResponseEntity.ok(pointsService.getPointsByCountry(country));
   }
 
   @GetMapping("/by-category")
-  public ResponseEntity<List<Points>> listByCategory(@RequestParam String category) {
+  public ResponseEntity<List<PointsResponseDTO>> listByCategory(@RequestParam String category) {
     return ResponseEntity.ok(pointsService.getPointsByCategory(category));
   }
 
   @GetMapping("/by-tag")
-  public ResponseEntity<List<Points>> listByTags (@RequestParam String tags) {
+  public ResponseEntity<List<PointsResponseDTO>> listByTags (@RequestParam String tags) {
     return ResponseEntity.ok(pointsService.getPointsByTag(tags));
   }
 
   @GetMapping("/active")
-  public ResponseEntity<List<Points>> listActivePoints(){
-    List<Points> activePoints =pointsService.getActivePoints();
+  public ResponseEntity<List<PointsResponseDTO>> listActivePoints(){
+    List<PointsResponseDTO> activePoints =pointsService.getActivePoints();
     return ResponseEntity.ok(activePoints);
   }
 
   @GetMapping("/rating")
-  public ResponseEntity<List<Points>> listByRating(@RequestParam double rating) {
+  public ResponseEntity<List<PointsResponseDTO>> listByRating(@RequestParam double rating) {
     return ResponseEntity.ok(pointsService.getPointsByRating(rating));
   }
 
   @PostMapping("/within-polygon")
-  public ResponseEntity<List<Points>> getPointsWithinPolygon(@RequestBody Object geoJsonPolygon) {
+  public ResponseEntity<List<PointsResponseDTO>> getPointsWithinPolygon(@RequestBody Object geoJsonPolygon) {
     return ResponseEntity.ok(pointsService.getPointsWithinPolygon(geoJsonPolygon));
   }
 
   @GetMapping("/nearby")
-  public ResponseEntity<List<Points>> listNearbyPoints(
+  public ResponseEntity<List<PointsResponseDTO>> listNearbyPoints(
                                        @RequestParam double longitude,
                                        @RequestParam double latitude,
                                        @RequestParam double radiusKm) {
@@ -84,10 +86,10 @@ public class PointsController {
   }
 
   @PostMapping
-  public ResponseEntity<Points> createPoints(@RequestBody Points points) {
+  public ResponseEntity<PointsResponseDTO> createPoints(@RequestBody @Valid PointsRequestDTO points) {
 
     try {
-      Points newPoint = pointsService.createPoint(points);
+      PointsResponseDTO newPoint = pointsService.createPoint(points);
       return new ResponseEntity<>(newPoint, HttpStatus.CREATED);
     }catch (IllegalArgumentException e){
       return ResponseEntity.badRequest().build();
@@ -95,9 +97,9 @@ public class PointsController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Points> updatePoints(@PathVariable String id, @RequestBody Points updatePoint) {
+  public ResponseEntity<PointsResponseDTO> updatePoints(@PathVariable String id, @RequestBody @Valid PointsRequestDTO updatePoint) {
     try {
-      Points result = pointsService.updatePoint(id, updatePoint);
+      PointsResponseDTO result = pointsService.updatePoint(id, updatePoint);
       return ResponseEntity.ok(result);
     } catch (IllegalArgumentException e) {
       return ResponseEntity.notFound().build();
