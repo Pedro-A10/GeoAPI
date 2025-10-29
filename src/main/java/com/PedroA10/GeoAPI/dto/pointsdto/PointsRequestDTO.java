@@ -1,4 +1,4 @@
-package com.PedroA10.GeoAPI.dto;
+package com.PedroA10.GeoAPI.dto.pointsdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

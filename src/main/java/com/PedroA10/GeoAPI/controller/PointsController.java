@@ -1,7 +1,7 @@
 package com.PedroA10.GeoAPI.controller;
 
-import com.PedroA10.GeoAPI.dto.PointsRequestDTO;
-import com.PedroA10.GeoAPI.dto.PointsResponseDTO;
+import com.PedroA10.GeoAPI.dto.pointsdto.PointsRequestDTO;
+import com.PedroA10.GeoAPI.dto.pointsdto.PointsResponseDTO;
 import com.PedroA10.GeoAPI.service.PointsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
