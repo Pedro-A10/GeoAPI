@@ -56,6 +56,11 @@ public class PointsController {
     return ResponseEntity.ok(pointsService.getPointsByCategory(category));
   }
 
+  @GetMapping("/by-address")
+  public ResponseEntity<List<PointsResponseDTO>> listByAddressName(@RequestParam String address) {
+    return ResponseEntity.ok(pointsService.getPointsByAddress(address));
+  }
+
   @GetMapping("/by-tag")
   public ResponseEntity<List<PointsResponseDTO>> listByTags (@RequestParam String tags) {
     return ResponseEntity.ok(pointsService.getPointsByTag(tags));

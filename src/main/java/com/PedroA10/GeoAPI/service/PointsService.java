@@ -58,6 +58,11 @@ public class PointsService {
     return pointsMapper.toResponseDTOList(listCountryName);
   }
 
+  public List<PointsResponseDTO> getPointsByAddress(String address) {
+    List<Points> addressName = pointsRepository.findByAddress(address);
+    return pointsMapper.toResponseDTOList(addressName);
+  }
+
   public List<PointsResponseDTO> getPointsByCategory(String category) {
     List<Points> listByCategory = pointsRepository.findByCategory(category);
     return pointsMapper.toResponseDTOList(listByCategory);
@@ -69,7 +74,7 @@ public class PointsService {
   }
 
   public List<PointsResponseDTO> getActivePoints() {
-    List<Points> activePoints = pointsRepository.localeActive(true);
+    List<Points> activePoints = pointsRepository.findByActive(true);
     return pointsMapper.toResponseDTOList(activePoints);
   }
 
