@@ -7,32 +7,31 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private ResponseEntity<ErrorResponse> responseBuild(HttpStatus status, String message, String path) {
-    ErrorResponse error = new ErrorResponse(LocalDateTime.now(), status.value(), message, path);
+  private static final Map<Class<? extends Throwable>, HttpStatus> EXCEPTION_STATUS_MAP = Map.of(
+    UserNotFoundException.class, HttpStatus.NOT_FOUND,
+    PointNotFoundException.class, HttpStatus.NOT_FOUND,
+    InvalidCredentialsException.class, HttpStatus.UNAUTHORIZED,
+    InvalidJwtTokenException.class, HttpStatus.UNAUTHORIZED,
+    EmailAlreadyExistsException.class, HttpStatus.CONFLICT
+  );
+
+  private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, Throwable ex, HttpServletRequest request) {
+    ErrorResponse error = new ErrorResponse(
+      LocalDateTime.now(),
+      status.value(),
+      status.getReasonPhrase(),
+      ex.getMessage() + " | Path: " + request.getRequestURI()
+    );
     return new ResponseEntity<>(error, status);
   }
-
-  @ExceptionHandler({UserNotFoundException.class, PointNotFoundException.class})
-  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e, HttpServletRequest request) {
-    return responseBuild(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
-  }
-
-  @ExceptionHandler({InvalidCredentialsException.class, InvalidJwtTokenException.class})
-  public ResponseEntity<ErrorResponse> handleUnauthorized(RuntimeException e, HttpServletRequest request) {
-    return responseBuild(HttpStatus.UNAUTHORIZED, e.getMessage(), request.getRequestURI());
-  }
-
-  @ExceptionHandler(EmailAlreadyExistsException.class)
-  public ResponseEntity<ErrorResponse> handleConflict(EmailAlreadyExistsException e, HttpServletRequest request) {
-    return responseBuild(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
-  }
-
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {
-    return responseBuild(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), request.getRequestURI());
+  @ExceptionHandler(Throwable.class)
+  public ResponseEntity<ErrorResponse> handleAllExceptions(Throwable ex, HttpServletRequest request) {
+    HttpStatus status = EXCEPTION_STATUS_MAP.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+    return buildResponse(status, ex, request);
   }
 }
