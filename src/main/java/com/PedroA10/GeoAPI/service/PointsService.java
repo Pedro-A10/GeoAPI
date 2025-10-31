@@ -2,6 +2,7 @@ package com.PedroA10.GeoAPI.service;
 
 import com.PedroA10.GeoAPI.dto.pointsdto.PointsRequestDTO;
 import com.PedroA10.GeoAPI.dto.pointsdto.PointsResponseDTO;
+import com.PedroA10.GeoAPI.exception.PointNotFoundException;
 import com.PedroA10.GeoAPI.mapper.PointsMapper;
 import com.PedroA10.GeoAPI.model.Points;
 import com.PedroA10.GeoAPI.repository.PointsRepository;
@@ -11,7 +12,6 @@ import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PointsService {
@@ -29,13 +29,13 @@ public class PointsService {
   }
 
   public List<PointsResponseDTO> findAll() {
-    List<Points> pointsList =  pointsRepository.findAll();
-    return pointsMapper.toResponseDTOList(pointsList);
+    return pointsMapper.toResponseDTOList(pointsRepository.findAll());
   }
 
-  public Optional<PointsResponseDTO> findById(String id) {
-    Optional<Points> pointsOPT = pointsRepository.findById(id);
-    return pointsOPT.map(pointsMapper::toResponseDTO);
+  public PointsResponseDTO findById(String id) {
+    Points  pointsOPT = pointsRepository.findById(id)
+      .orElseThrow(() -> new PointNotFoundException("Point not found with id " + id));
+    return pointsMapper.toResponseDTO(pointsOPT);
   }
 
   public List<PointsResponseDTO> findByName(String name) {
@@ -96,19 +96,18 @@ public class PointsService {
   }
 
   public PointsResponseDTO updatePoint(String id, PointsRequestDTO requestDTO) {
-    Optional<Points> pointsOPT = pointsRepository.findById(id);
-    if (pointsOPT.isEmpty()) {
-      throw new RuntimeException("Point not found");
-    }
+    Points existingPoint = pointsRepository.findById(id)
+      .orElseThrow(() -> new PointNotFoundException("Point not found with id " + id));
 
-    Points existingPoint = pointsOPT.get();
     pointsMapper.updateEntityFromDTO(requestDTO, existingPoint);
-    existingPoint.setId(id);
-    Points updatedPoint = pointsRepository.save(existingPoint);
-    return pointsMapper.toResponseDTO(updatedPoint);
+    Points updatePoint = pointsRepository.save(existingPoint);
+    return pointsMapper.toResponseDTO(updatePoint);
   }
 
   public void deletePoint(String id) {
+    if (!pointsRepository.existsById(id)) {
+      throw new PointNotFoundException("Point not found with id " + id);
+    }
     pointsRepository.deleteById(id);
   }
 }

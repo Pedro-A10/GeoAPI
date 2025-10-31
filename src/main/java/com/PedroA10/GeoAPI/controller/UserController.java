@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -26,28 +25,18 @@ public class UserController {
 
   @GetMapping("/{id}")
   public ResponseEntity<UserResponseDTO> listById(@PathVariable String id) {
-    Optional<UserResponseDTO> point = userService.findById(id);
-    return point.map(ResponseEntity::ok)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+    return ResponseEntity.ok(userService.findById(id));
   }
 
   @PostMapping
   public ResponseEntity<UserResponseDTO> registerUser(@RequestBody @Valid UserRequestDTO users) {
-    try {
-      UserResponseDTO newUser = userService.registerUser(users);
-      return new ResponseEntity<>(newUser, HttpStatus.CREATED);
-    }catch (IllegalArgumentException e){
-      return ResponseEntity.badRequest().build();
-    }
+    UserResponseDTO newUser = userService.registerUser(users);
+    return new ResponseEntity<>(newUser, HttpStatus.CREATED);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-    try {
-      userService.deleteUser(id);
-      return ResponseEntity.noContent().build();
-    }catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
-    }
+    userService.deleteUser(id);
+    return ResponseEntity.noContent().build();
   }
 }

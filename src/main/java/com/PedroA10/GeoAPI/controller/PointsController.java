@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/locates")
@@ -26,9 +25,7 @@ public class PointsController {
 
   @GetMapping("/{id}")
   public ResponseEntity<PointsResponseDTO> listById(@PathVariable String id) {
-    Optional<PointsResponseDTO> point = pointsService.findById(id);
-    return point.map(ResponseEntity::ok)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+    return ResponseEntity.ok(pointsService.findById(id));
   }
 
   @GetMapping("/by-name")
@@ -92,32 +89,19 @@ public class PointsController {
 
   @PostMapping
   public ResponseEntity<PointsResponseDTO> createPoints(@RequestBody @Valid PointsRequestDTO points) {
-
-    try {
-      PointsResponseDTO newPoint = pointsService.createPoint(points);
-      return new ResponseEntity<>(newPoint, HttpStatus.CREATED);
-    }catch (IllegalArgumentException e){
-      return ResponseEntity.badRequest().build();
-    }
+    PointsResponseDTO newPoint = pointsService.createPoint(points);
+    return new ResponseEntity<>(newPoint, HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<PointsResponseDTO> updatePoints(@PathVariable String id, @RequestBody @Valid PointsRequestDTO updatePoint) {
-    try {
-      PointsResponseDTO result = pointsService.updatePoint(id, updatePoint);
-      return ResponseEntity.ok(result);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
-    }
+    PointsResponseDTO result = pointsService.updatePoint(id, updatePoint);
+    return ResponseEntity.ok(result);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deletePoints(@PathVariable String id) {
-    try {
-      pointsService.deletePoint(id);
-      return ResponseEntity.noContent().build();
-    }catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
-    }
+    pointsService.deletePoint(id);
+    return ResponseEntity.noContent().build();
   }
 }
